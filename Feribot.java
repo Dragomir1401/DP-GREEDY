@@ -41,7 +41,6 @@ public class Feribot {
 		}
 
 		private long calcMax(long[] v) {
-
 			long res = 0;
 			for (long num : v) {
 				if (num > res) {
@@ -56,23 +55,31 @@ public class Feribot {
 			for (long num : v) {
 				res += num;
 			}
-
 			return res;
 		}
 
 		private long spread(long[] v, long n, long target) {
 			try {
+				// Variable for storing sum
 				long carry = 0;
+
+				// Result
 				long noIntervals = 0;
 
+				// For each value in array
 				for (long num : v) {
+					// Add to sum storage
 					carry += num;
+
+					// If it surpasses the target sum we reset it to 0 and add current number
+					// to it adn increase result
 					if (carry > target) {
-						carry = num;
+						carry = 0 + num;
 						noIntervals++;
 					}
 				}
 
+				// Final check to match the last cars left without a feribot
 				if (carry <= target) {
 					noIntervals++;
 				}
@@ -82,34 +89,48 @@ public class Feribot {
 				throw new RuntimeException(e);
 			}
 		}
+		long binarySearch(long pos, long sum) {
+			// Left is most favorable case -> the max in array
+			long left = calcMax(v);
 
+			// Right is least favorable -> the sum in the entire array
+			long right = calcSum(v);
+
+			// -> Do a binary search to find optimal solution
+			// Binary search from max to total sum to find the optimum target min sum
+			while (left <= right) {
+				// Set up mid value
+				long mid = (left + right) / 2;
+
+				// Find the number of feribots we need for this value
+				long noIntervals = spread(v, n, mid);
+
+				// Number of feribots and target weigth per feribot are inverse proportions
+
+				// Restrain the interval based on how our current solution states
+				if (noIntervals <= k) {
+					right = mid - 1;
+					pos = mid;
+				} else if (noIntervals > k) {
+					left = mid + 1;
+				}
+			}
+
+			return pos;
+		}
 		private long getResult() {
 			try {
-				long left = calcMax(v);
-				long right = calcSum(v);
-				long sum = left;
+				// Initialise pos for binary search
 				long pos = -1;
 
-				// Binary search from max to total sum to find the optimum target min sum
-				while (left <= right) {
-					long mid = (left + right) / 2;
-					long noIntervals = spread(v, n, mid);
+				// Compute max in array for most favorable case
+				long sum = calcMax(v);
 
-					if (noIntervals <= k) {
-						right = mid - 1;
-						pos = mid;
-					} else if (noIntervals > k) {
-						left = mid + 1;
-					}
-				}
+				// Update pos using binary search
+				pos = binarySearch(pos, sum);
 
-
-				// Return min target sum reached
-				if (pos == -1) {
-					return sum;
-				}
-
-				return pos;
+				// If pos was not updated then return most favorable case
+				return (pos == -1 ? sum : pos);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

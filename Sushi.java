@@ -26,7 +26,7 @@ class Sushi {
 		}
 		return a;
 	}
-	static int computeMaxExt(int a, int b, int c) {
+	static int computeMaxThreeElems(int a, int b, int c) {
 		if (a > b && a > c) {
 			return a;
 		}
@@ -37,69 +37,92 @@ class Sushi {
 		return c;
 	}
 
-	static int task1() {
-		try {
-			int[] totalGrades = new int[m];
-			for (int i = 0; i < m; i++) {
-				totalGrades[i] = 0;
+	static int computeMaxArray(int[] arr, int n) {
+		int max = 0;
+		for (int i = 0; i < n; i++) {
+			if (arr[i] > max) {
+				max = arr[i];
 			}
-
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
-					totalGrades[i] += grades[j][i];
-				}
-			}
-
-			int[] dp = new int[n * x + 1];
-
-			for (int i = 0; i < m; i++) {
-				for (int j = n * x; j >= prices[i]; j--) {
-					dp[j] = computeMax(dp[j], dp[j  - prices[i]] + totalGrades[i]);
-				}
-			}
-
-			int maxim = 0;
-			for (int i = 0; i <= n * x; i++) {
-				if (dp[i] > maxim) {
-					maxim = dp[i];
-				}
-			}
-
-			return maxim;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
 		}
+		return max;
 	}
 
-	static int[] extendPrices() {
-		int mCopy = m * 2;
-		int[] pricesExtended = new int[mCopy];
-
+	static int[] computeTotalGrades() {
+		// Initialise total grades from firend with 0
+		int[] totalGrades = new int[m];
 		for (int i = 0; i < m; i++) {
-			pricesExtended[i] = prices[i];
-		}
-
-		for (int i = m; i < mCopy; i++) {
-			pricesExtended[i] = prices[i - m];
-		}
-		return pricesExtended;
-	}
-
-	static int[] extendTotalGrades() {
-		int mCopy = m * 2;
-		int[] totalGrades = new int[mCopy];
-
-		for (int i = 0; i < mCopy; i++) {
 			totalGrades[i] = 0;
 		}
 
+		// Add each friend grade in the total grades array
 		for (int i = 0; i < m; i++) {
 			for (int j = 0; j < n; j++) {
 				totalGrades[i] += grades[j][i];
 			}
 		}
 
+		return totalGrades;
+	}
+	static int task1() {
+		try {
+			// Create total grades
+			int[] totalGrades = computeTotalGrades();
 
+			// Initialise dp array
+			int[] dp = new int[n * x + 1];
+
+			// For each dish
+			for (int i = 0; i < m; i++) {
+				// For target max price to price of each dish
+				for (int j = n * x; j >= prices[i]; j--) {
+					// Dp is max between himself or anterior dp plus the new element added now
+					dp[j] = computeMax(dp[j], dp[j  - prices[i]] + totalGrades[i]);
+				}
+			}
+
+			// Return max in the dp array
+			return computeMaxArray(dp, n * x + 1);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	static int[] extendPrices() {
+		// Extend the prices array by doubling it so we can take max 2 of each dish
+		int mCopy = m * 2;
+		int[] pricesExtended = new int[mCopy];
+
+		// Put first m elements
+		for (int i = 0; i < m; i++) {
+			pricesExtended[i] = prices[i];
+		}
+
+		// Put last m elements
+		for (int i = m; i < mCopy; i++) {
+			pricesExtended[i] = prices[i - m];
+		}
+
+		return pricesExtended;
+	}
+
+	static int[] extendTotalGrades() {
+		// Extend the totalGrades array by doubling it so we can take max 2 of each dish
+		int mCopy = m * 2;
+		int[] totalGrades = new int[mCopy];
+
+		// Initialise total grades
+		for (int i = 0; i < mCopy; i++) {
+			totalGrades[i] = 0;
+		}
+
+		// Put first m elements
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				totalGrades[i] += grades[j][i];
+			}
+		}
+
+		// Put last m elements
 		for (int i = m; i < mCopy; i++) {
 			for (int j = 0; j < n; j++) {
 				totalGrades[i] += grades[j][i - m];
@@ -110,70 +133,85 @@ class Sushi {
 	}
 
 	static int task2() {
-		int mCopy = m * 2;
-		int[] pricesExtended = extendPrices();
-
-		int[] totalGrades = extendTotalGrades();
-
 		try {
+			// Extend prices and totalGrades wso we can take up to 2 identic dishes
+			int mCopy = m * 2;
+			int[] pricesExtended = extendPrices();
+			int[] totalGrades = extendTotalGrades();
 
-
+			// Initialise dp
 			int[] dp = new int[n * x + 1];
 
+			// For each dish
 			for (int i = 0; i < mCopy; i++) {
+				// From target max price to price of each dish
 				for (int j = n * x; j >= pricesExtended[i]; j--) {
+					// Dp is max between himself or anterior dp plus the new element added now
 					dp[j] = computeMax(dp[j], dp[j  - pricesExtended[i]] + totalGrades[i]);
 				}
 			}
 
-
-			int maxim = 0;
-			for (int i = 0; i <= n * x; i++) {
-				if (dp[i] > maxim) {
-					maxim = dp[i];
-				}
-			}
-
-			return maxim;
+			// Answer is max in dp array
+			return computeMaxArray(dp, n * x + 1);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	static int task3() {
-		try {
+	static int createDp(int[][][] dp, int[] totalGrades, int[] pricesExtended, int mCopy) {
+		int result = 0;
 
-			int mCopy = m * 2;
+		// For each dish
+		for (int dish = 1; dish < mCopy; dish++) {
+			// For each price from 1 to max price
+			for (int price = 1; price <= n * x; price++) {
+				// For using exactly dishCOunt dishes
+				for (int dishCount = 1; dishCount <= computeMin(n, dish + 1); dishCount++) {
+					// If the price of the dish is lower current dp element(therefore the max
+					// price in the end)
+					if (pricesExtended[dish] <= price) {
+						// Dp is the max between himself, the anterior dp using k - 1
+						// elements instead of k
+						// and adding the current dish grade and the value of the anterior
+						// dp if it is not
+						// favorable to take the current dish
+						dp[dish][price][dishCount] =
+								computeMaxThreeElems(dp[dish][price][dishCount],
+								dp[dish - 1][price - pricesExtended[dish]][dishCount - 1]
+										+ totalGrades[dish],
+								dp[dish - 1][price][dishCount]);
 
-			PrintWriter pw = new PrintWriter(new File("debug"));
-			// dp[i][j][k] = maximum sum for obtaining price i using j total
-			// grades using first k dishes
-			int[][][] dp = new int[mCopy + 1][n * x + 1][n + 1];
-
-			int[] pricesExtended = extendPrices();
-			int[] totalGrades = extendTotalGrades();
-			int result = 0;
-
-			dp[0][computeMin(pricesExtended[0], n * x)][1] = totalGrades[0];
-
-			for (int i = 1; i < mCopy; i++) {
-				for (int j = 1; j <= n * x; j++) {
-					for (int k = 1; k <= computeMin(n, i + 1); k++) {
-						if (pricesExtended[i] <= j) {
-							dp[i][j][k] = computeMaxExt(dp[i][j][k], dp[i - 1][j - pricesExtended[i]][k - 1] + totalGrades[i], dp[i - 1][j][k]);
-
-						} else {
-							dp[i][j][k] = dp[i - 1][j][k];
-						}
-
-						result = computeMax(result, dp[i][j][k]);
+					} else {
+						// Dp is the anterior dp without taking the current dish
+						dp[dish][price][dishCount] = dp[dish - 1][price][dishCount];
 					}
+
+					// Result is max in the dp array iin the end
+					result = computeMax(result, dp[dish][price][dishCount]);
 				}
 			}
+		}
+		return result;
+	}
 
-			pw.close();
+	static int task3() {
+		try {
+			int mCopy = m * 2;
+			// dp[i][j][k] = maximum grade using the first i dishes with price j
+			// and using exactly k dishes
+			int[][][] dp = new int[mCopy + 1][n * x + 1][n + 1];
 
-			return result;
+			// Extend prices, totalGrades and initalise result
+			int[] pricesExtended = extendPrices();
+			int[] totalGrades = extendTotalGrades();
+
+			// Initialise dp for first dish price
+			// If it exceeds max price target then initialise that field instead
+			// with its corresponding grade
+			dp[0][computeMin(pricesExtended[0], n * x)][1] = totalGrades[0];
+
+			// Compute result
+			return createDp(dp, totalGrades, pricesExtended, mCopy);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
