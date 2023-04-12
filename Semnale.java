@@ -21,8 +21,8 @@ class Semnale {
 	static long type1() {
 		// Create dp array
 		long[][][] dp = new long[x + y + 1][x + 1][2];
-		// dp[i][j][k] = Number of posibilities to have a correct
-		// sequence with i elements, using j 0 values and finsihing in value k
+		// dp[i][j][k] = Number of possibilities to have a correct
+		// sequence with i elements, using j 0 values and finishing in value k
 
 		// Intialise dp
 		dp[1][1][0] = 1; // 1 element, 1 zero, finishing in 0 -> 0
@@ -84,7 +84,7 @@ class Semnale {
 		}
 
 		// Answer is of length x + y, with x zeros, finishing in either 1 or 0
-		return (dp[x + y][x][1] % mod + dp[x + y][x][0] % mod) % mod;
+		return (dp[x + y][x][1]+ dp[x + y][x][0]) % mod;
 	}
 
 	public static void main(String[] args) {

@@ -89,35 +89,32 @@ public class Feribot {
 				throw new RuntimeException(e);
 			}
 		}
+
 		long binarySearch(long pos, long sum) {
-			// Left is most favorable case -> the max in array
-			long left = calcMax(v);
+			long left = calcMax(v); // Initialize left to the maximum value in v
+			long right = calcSum(v); // Initialize right to the sum of all elements in v
 
-			// Right is least favorable -> the sum in the entire array
-			long right = calcSum(v);
-
-			// -> Do a binary search to find optimal solution
-			// Binary search from max to total sum to find the optimum target min sum
-			while (left <= right) {
-				// Set up mid value
-				long mid = (left + right) / 2;
+			while (left < right) {
+				long mid = (left + right) >> 1; // Compute mid using bit shift
 
 				// Find the number of feribots we need for this value
 				long noIntervals = spread(v, n, mid);
 
-				// Number of feribots and target weigth per feribot are inverse proportions
-
 				// Restrain the interval based on how our current solution states
 				if (noIntervals <= k) {
-					right = mid - 1;
+					// If the number of intervals is less than or equal to k, we have
+					// a valid solution
+					right = mid;
 					pos = mid;
-				} else if (noIntervals > k) {
+				} else {
+					// If the number of intervals is greater than k, we need to increase the sum
 					left = mid + 1;
 				}
 			}
 
 			return pos;
 		}
+
 		private long getResult() {
 			try {
 				// Initialise pos for binary search

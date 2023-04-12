@@ -165,16 +165,15 @@ class Sushi {
 		for (int dish = 1; dish < mCopy; dish++) {
 			// For each price from 1 to max price
 			for (int price = 1; price <= n * x; price++) {
-				// For using exactly dishCOunt dishes
+				// For using exactly dishCount dishes
 				for (int dishCount = 1; dishCount <= computeMin(n, dish + 1); dishCount++) {
-					// If the price of the dish is lower current dp element(therefore the max
-					// price in the end)
+					// If the price of the dish is lower than the current dp element(therefore
+					// the max price in the end)
 					if (pricesExtended[dish] <= price) {
-						// Dp is the max between himself, the anterior dp using k - 1
-						// elements instead of k
-						// and adding the current dish grade and the value of the anterior
-						// dp if it is not
-						// favorable to take the current dish
+						// Dp is the max between himself, the anterior dp using dishCount - 1
+						// elements instead of dishCount + adding the current dish grade and
+						// the value of the anterior dp if it is not favorable to take the
+						// current dish
 						dp[dish][price][dishCount] =
 								computeMaxThreeElems(dp[dish][price][dishCount],
 								dp[dish - 1][price - pricesExtended[dish]][dishCount - 1]

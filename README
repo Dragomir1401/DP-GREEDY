@@ -1,0 +1,350 @@
+______________________________
+|                            |
+|   Copyright                |
+|      Dragomir Andrei 2023  |
+|                            |
+|____________________________|
+
+---------------------------------------------------------------------
+Nume: Dragomir Andrei
+Grupa: 322CA
+
+ALGORITHMS DESIGN
+
+----------------------------------------------------------------------------
+------------------------------------DP & GREEDY-----------------------------
+----------------------------------------------------------------------------
+
+								CONTENT
+
+	- Feribot.java, Nostory.java, Sushi.java, Semnale.java, Badgpt.java
+	- Makefile
+	- README
+
+
+----------------------------------------------------------------------------
+
+____________Description___________
+
+
+	The project implements 5 dp & greedy solutions to 5 problems:
+
+
+        - Feribot                  - Nostory
+
+        - Sushi                        - Semnale
+
+                            - Badgpt
+
+-----------------------------------------------------------------------------
+
+
+
+------------------------------------------------------------------------------
+
+____________Implementation____________
+
+
+    ---------------------------FERIBOT--------------------------
+
+    COMPLEXITY: O(n * log(n))
+
+    IDEA: Binary search for the answer.
+
+        We do a binary search in the interval (max, total_sum) in array to see
+    what would be the suitable max weight we should take for a ferry.
+    for the target current weight we try to spread the cars, each one
+    entering in order after the other, to spread them on multiple ferry
+    by putting car by car and going to a new ferry when we exceed agreed weight.
+
+        Since if we want more units of transportation we have to target a lower
+    weight per transport, we resize the interval accordingly and when we find
+    exactly k ferry we found the answer.
+
+
+
+    ---------------------------NOSTORY--------------------------
+
+        TASK1----------
+        COMPLEXITY: O(n)
+
+        IDEA: Find the first n max values in the a and b arrays.
+
+            Since we have unlimited moves, we can find out a way
+        to manipulate the numbers so that the first biggest n values
+        in a common array a + b are paired with the smallest n values.
+        This way we can get the best score out the 2 arrays.
+
+
+        TASK2----------
+        COMPLEXITY: O(n * log(n)) (TreeMap insertion)
+
+        IDEA: Find the biggest values already paired with smaller values
+              and use them then with each move try to complete with the
+              rest values remaining unused in the first biggest n values
+              in a + b.
+
+            Since we have tracked moves, we have to be more cautious with how
+        we try to get the best score. We add all numbers in a and b in a
+        TreeMap so we know they are sorted after insertion. We insert keys
+        representing the number and values which indicate if the number was
+        used in solution.
+
+            With the values sorted descending we try to find out what numbers
+        from the first biggest n were not used yet and use them one by one until
+        we dont have possible moves anymore. With one move we can move a number
+        in a favorable pair where it is bigger than its correspondent.
+
+
+
+
+    ---------------------------SUSHI--------------------------
+
+        TASK1----------
+        COMPLEXITY: O(m * n * x)
+
+        IDEA: Do a classic dp approach similar to rucksack problem.
+
+            We compute the total grades received by each dish by adding
+        each grade given by each friend.
+
+            Since we have to take maximum 1 of each dish, we have to
+        find the best combination. A Greedy approach of seeing which
+        dish is the best regrading grade per cost would fail for more
+        delicate cases. This is why we use a dp array with dimension
+        equal to what price we are targeting.
+
+            We build the dp from the end because we are using the
+        space optimised version with an unidimensional array. If we
+        start traversing the dp from end to start then it can be done
+        with a single dimension array. The result is the maximum value
+        in the dp previously built.
+
+
+
+        TASK2----------
+        COMPLEXITY: O(m * n * x)
+
+        IDEA: Double the price and the totalGrades array and use the
+              same idea described in task1.
+
+            Because we want to take maximum two of each dish type we can
+        achieve that with the same idea but by doubling the arrays used.
+
+
+
+        TASK3----------
+        COMPLEXITY: O(m ^ 2 * n * x)
+
+        IDEA: Keep the doubled arrays but use a dp array with multiple
+              dimensions to keep track of multiple criteria.
+
+            Because we want to take maximum two of each dish type we can
+        keep the idea from task2. The dp we have to use has 3 dimensions:
+
+         dp[i][j][k] = maximum grade using the first i dishes with price j
+        			   by using exactly k dishes.
+
+            We have to build this structure with 3 for structures: one which
+         iterates through each dish, one which go through each price and
+         one which tracks how many dishes we used in that step(it goes from 1
+         to the minimum of n and dish + 1 because we are trying to use at most
+         n dishes in total, but we can use less than that too).
+
+            Dp in each step is calculated as the max between:
+         - himself
+         - the anterior dp using dishCount - 1 dishes instead of dishCount
+         and adding the current dish grade
+         - the value of the anterior dp + nothing if it is not favorable to
+         take the current dish into consideration
+
+            Since we are taking in consideration prices from 1 to max price
+         we have to do a check if the difference price - pricesExtended[dish]
+         is greater than zero because we will access that element as second
+         dimension. If it is not simply add the the value of the anterior dp.
+
+
+
+
+    ---------------------------SEMNALE--------------------------
+
+        TASK1----------
+        COMPLEXITY: O((x + y) * x)
+
+        IDEA: Build a dp with the given criteria.
+
+            We have to respect the generation of sequences of bytes
+        by not letting two or more bytes of one next to each other.
+        We can keep track of how many sequences we can create by using a dp:
+
+        dp[i][j][k] = Number of possibilities to have a correct
+        		      sequence with i elements, using j values of 0 and
+        		      finishing in value = k.
+
+            We have to initialise the dp for sequences of size 1:
+
+            dp[1][1][0] = 1; // 1 element, 1 zero, finishing in 0 -> 0
+            dp[1][0][1] = 1; // 1 element, 0 zeros, finishing in 1 -> 1
+
+            Then we are using a for structure for each sequence size, then
+        one for how many zeros we are using in the current sequence. The second
+        for goes from 1 to the minimum of seqSize and x since we cant have more
+        than x zeros in a solution. The dp is built in to stages:
+
+        - if we add a 0: dp[seqSize][zeroCount][0] = (dp[seqSize - 1][zeroCount - 1][0]
+                         						+ dp[seqSize - 1][zeroCount - 1][1]) % mod;
+        we add a zero over a previous section ending in 0 or over one ending in 1 and
+        we are not breaking any rules since wee dont have two ones next to each other
+
+         - if we add a 1: dp[seqSize][zeroCount][1] = dp[seqSize - 1][zeroCount][0] % mod;
+
+         we add an one over a previous section ending in 0 not in 1 because we would break
+         the rule
+
+            The total count of how many sequences we created are the sequences created ending
+         in 1 and the others ending in 0 and of size (x + y): dp[x + y][x][1] + dp[x + y][x][0].
+
+
+
+
+        TASK2----------
+        COMPLEXITY: O((x + y) * x)
+
+        IDEA: Build a dp with the given criteria.
+
+            We have to respect the generation of sequences of bytes
+        by not letting three or more bytes of one next to each other.
+        We can keep track of how many sequences we can create by using
+        the same dp as before:
+
+        dp[i][j][k] = Number of possibilities to have a correct
+        		      sequence with i elements, using j values of 0 and
+        		      finishing in value = k.
+
+            We have to initialise the dp for sequences of size 1 and 2 this time
+        to be sure we start respecting the rule from the start:
+
+            dp[1][1][0] = 1; // 1 element, 1 zero, finishing in 0 -> 0
+            dp[1][0][1] = 1; // 1 element, 0 zeros, finishing in 1 -> 1
+            dp[2][2][0] = 1; // 2 elements, 2 zeros, finishing in 0 -> 00
+            dp[2][1][0] = 1; // 2 element2, 1 zero, finishing in 0 -> 10
+            dp[2][1][1] = 1; // 2 element2, 1 zero, finishing in 1 -> 01
+            dp[2][0][1] = 1; // 2 element2, 0 zeros, finishing in 1 -> 11 still correct
+
+            The difference is where we construct the dp structure to respect the new rule:
+
+        - if we add a 1: dp[seqSize][zeroCount][1] = (dp[seqSize - 1][zeroCount][0]
+                         						+ dp[seqSize - 2][zeroCount][0]) % mod;
+
+        we add an one over a previous section ending in 0 and over a sequence from two
+        steps ago that ended in 0 so this way we cannot have three ones next to each other,
+        we can just have 011 or 001.
+
+        - if we add a 0: dp[seqSize][zeroCount][0] = (dp[seqSize - 1][zeroCount - 1][0]
+                          						+ dp[seqSize - 1][zeroCount - 1][1]) % mod;
+        we add a zero over a previous section ending in 0 or over one ending in 1 and
+        we are not breaking any rules since we dont have three ones next to each other
+
+            The total count of how many sequences we created are the sequences created ending
+        in 1 and the others ending in 0 and of size (x + y): dp[x + y][x][1]+ dp[x + y][x][0].
+
+
+
+
+    ---------------------------BADGPT--------------------------
+
+
+        COMPLEXITY: O(G * log(L))
+
+        IDEA: Calculate number of possible source strings by observing
+              they form a fibonacci sequence.
+
+            We have to parse the input and when we find a character which
+        is not 'u' or 'n' we simply let the result the same since they dont
+        have more than 1 possibility of grouping them. If the char is 'u'
+        or 'n' we have to find the number of possibilities to group the source
+        string for that extension of chars.
+
+            If we take number by number to see how many source string they are we
+        find something like:
+        - n1 - 1 possibility
+        - n2 - 2 possibilities
+        - n3 - 3 possibilities
+        - n4 - 5 possibilities
+        - n5 - 8 possibilities
+        - n6 - 13 possibilities
+        ...so on
+
+            We observe that they form a Fibonacci series and we have to find the
+        element with index x in that series(taken from nx codification). We can
+        do that in linear time but with sizes up to 10 ^ 18 we would have a
+        costly implementation.
+
+            After researching ideas on the Internet, the best choice is to
+        use fast matrix exponentiation. If we use an auxiliary matrix which
+        would form our Fibonacci series we can do this as such:
+
+        A0 * [0 1] = A1 where A0 = (f0 f1) and A1 = (f1 f2) because f2 = f0 + f1
+             [1 1]
+
+        A1 * [0 1] = A2 where A1 = (f0 f1) and A2 = (f2 f3) because f3 = f1 + f2
+             [1 1]
+        ...so on
+
+        A(n-1) * [0 1] = An where A(n-1) = (f(n-2) f(n-1)) and An = (f(n-1) fn)
+                 [1 1]                       because fn = f(n-1) + f(n-2)
+
+        The solution fn is An[0][1].
+        We can do fast exponentiation on the matrix [0 1] = trans
+                                                    [1 1]
+
+        An = A(n-1) * trans = A(n-2) * trans ^ 2 =...= A0 * (trans ^ n).
+
+        Trans ^ n is done using laboratory functions.
+
+            Since the solution would be the second element of A0 * (trans ^ n)
+        which would look like:
+
+        [0 1] * (trans ^ n) = [0 1] [a b] = [c d] and the solution would be d.
+                                    [c d]
+        We can take directly the answer from sol = (trans ^ n) as being sol[1][1].
+
+
+
+------------------------------------------------------------------------------
+
+
+
+
+------------------------------------------------------------------------------
+
+_____________Comments_____________
+
+
+	The implementation could have been done faster and better if information
+about dp and greedy methods would have been more accessible and I would
+have had more experience with them. The problems were suitable, but with
+a grade of difficulty a little bit higher than they should have been.
+
+	The project was very useful in helping me learn how to understand and solve
+dp, greedy, divide & conquer and ad-hoc problems and understanding the logic
+behind but I do agree that more problems with less difficulty would have been
+better off to learn these techniques.
+
+------------------------------------------------------------------------------
+
+
+
+-----------------------------------------------------------------------------
+
+
+Resources:
+
+https://ocw.cs.pub.ro/courses/pa/laboratoare/laborator-03
+https://ocw.cs.pub.ro/courses/pa/laboratoare/laborator-04
+https://ocw.cs.pub.ro/courses/pa/laboratoare/laborator-02
+https://ocw.cs.pub.ro/courses/pa/laboratoare/laborator-01
+https://stackoverflow.com/questions/32272794/finding-the-nth-fib-number-in-ologn
+
+
+-----------------------------------------------------------------------------
